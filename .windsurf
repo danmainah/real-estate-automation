@@ -1,0 +1,97 @@
+project:
+  name: Real Estate Client Intake & Scheduling Automation
+  description: >
+    A full-stack automation system for real estate brokerages to capture lead form submissions,
+    send follow-up messages, and track engagement status via a real-time dashboard.
+  deploy_target: Vercel (Frontend + Agent Dashboard)
+  automation_platform: n8n (Cloud or self-hosted)
+  database: Supabase (PostgreSQL + optional Realtime)
+  language: TypeScript (Next.js), SQL, and Node.js (optional backend API)
+  ui_framework: shadcn/ui + Tailwind CSS
+  messaging:
+    email: Resend (100 free emails/month)
+    sms: Twilio (free trial $15)
+  goal: >
+    Hands-free lead intake and follow-up, with status tracking through a clean,
+    real-time dashboard for agents and management.
+
+milestones:
+  - name: Phase 1 – Lead Form
+    tasks:
+      - Create a basic Next.js form (fields: Name, Email, Phone, Property Address)
+      - Client-side validation
+      - POST data to n8n Webhook
+      - Deploy form to Vercel
+
+  - name: Phase 2 – n8n Automation
+    tasks:
+      - Set up webhook trigger (n8n)
+      - Insert lead into Supabase with current_status: "Received"
+      - Send confirmation email via Resend
+          - On success: update current_status: "Emailed"
+      - Send SMS via Twilio
+          - On success: update current_status: "Texted"
+      - Update `status_email` and `status_sms` silently for future logic
+
+  - name: Phase 3 – Supabase Backend
+    tasks:
+      - Create `leads` table
+      - Set up row-level security (optional)
+      - Configure service role key for insert/update from n8n
+
+  - name: Phase 4 – Agent Dashboard
+    tasks:
+      - Build dashboard with shadcn/ui and Tailwind CSS
+      - Display columns:
+          - Name | Email | Phone | Property Address | Current Status
+      - Fetch data from Supabase REST API or client library
+      - Auto-refresh with polling (10s) or Supabase Realtime
+
+  - name: Phase 5 – Polish & QA
+    tasks:
+      - Handle failed email/SMS gracefully
+      - Validate required fields (frontend & backend)
+      - Optimize for mobile/tablet
+      - Add visual cues (badges, colors) for status states
+      - Optional: Add admin notification for failed steps
+
+resources:
+  n8n:
+    mode: Cloud (free trial) or Self-hosted
+    free_trial: https://n8n.io/cloud
+    nodes_used:
+      - Webhook
+      - HTTP Request (Supabase API)
+      - Resend Node / HTTP Request
+      - Twilio Node / HTTP Request
+      - Set Node (to update current_status)
+  email:
+    provider: Resend
+    free_plan: 100 emails/month
+    docs: https://resend.com/docs
+  sms:
+    provider: Twilio
+    free_trial: $15 credit (signup)
+    docs: https://www.twilio.com/docs/sms
+  supabase:
+    table: leads
+    schema_sql: |
+      CREATE TABLE leads (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        property_address TEXT NOT NULL,
+        current_status TEXT DEFAULT 'Received',  -- 'Received', 'Emailed', 'Texted'
+        status_email TEXT DEFAULT 'Pending',     -- backend only
+        status_sms TEXT DEFAULT 'Pending',       -- backend only
+        created_at TIMESTAMP DEFAULT now()
+      );
+  environment_variables:
+    - SUPABASE_URL
+    - SUPABASE_ANON_KEY
+    - SUPABASE_SERVICE_ROLE_KEY
+    - RESEND_API_KEY
+    - TWILIO_ACCOUNT_SID
+    - TWILIO_AUTH_TOKEN
+    - TWILIO_PHONE_NUMBER
