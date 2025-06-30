@@ -130,7 +130,7 @@ export default function LeadForm() {
             Property Interest Form
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Please fill out the form below and we'll get back to you soon.
+            Please fill out the form below and we&apos;ll get back to you soon.
           </p>
         </div>
 

@@ -13,7 +13,7 @@ export default function Home() {
           </p>
           <div className="mt-8 max-w-xl mx-auto bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Ready to move in? Let's get started!
+              Ready to move in? Let&apos;s get started!
             </h2>
             <p className="text-gray-600 mb-6">
               Complete the form below and our expert agents will help you find your perfect home
