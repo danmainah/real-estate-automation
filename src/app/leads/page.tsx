@@ -1,5 +1,8 @@
 'use client';
 
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+
 import { useState } from 'react';
 
 type FormData = {
@@ -17,6 +20,15 @@ type FormErrors = {
 };
 
 export default function LeadForm() {
+  // Add admin link in the top right
+  const AdminLink = () => (
+    <div className="absolute top-4 right-4">
+      <Button variant="outline" asChild>
+        <Link href="/admin">Admin Dashboard</Link>
+      </Button>
+    </div>
+  );
+
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -82,8 +94,19 @@ export default function LeadForm() {
     setSubmitStatus(null);
     
     try {
-      // Replace with your actual n8n webhook URL
-      const response = await fetch('YOUR_N8N_WEBHOOK_URL', {
+      // Check if the webhook URL is configured
+      const webhookUrl = process.env.NEXT_PUBLIC_N8N_URL;
+      if (!webhookUrl) {
+        throw new Error('N8N webhook URL is not configured. Please check your environment variables.');
+      }
+      
+      console.log('Sending request to:', webhookUrl);
+      console.log('Request payload:', {
+        ...formData,
+        submittedAt: new Date().toISOString(),
+      });
+      
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,8 +117,12 @@ export default function LeadForm() {
         }),
       });
       
+      console.log('Response status:', response.status);
+      const responseData = await response.json().catch(() => ({}));
+      console.log('Response data:', responseData);
+      
       if (!response.ok) {
-        throw new Error('Failed to submit form');
+        throw new Error(`Server responded with status ${response.status}: ${JSON.stringify(responseData)}`);
       }
       
       setSubmitStatus({
@@ -123,6 +150,8 @@ export default function LeadForm() {
   };
 
   return (
+    <>
+      <AdminLink />
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full mx-auto">
         <div className="text-center">
@@ -249,5 +278,6 @@ export default function LeadForm() {
         </div>
       </div>
     </div>
+    </>
   );
 }
