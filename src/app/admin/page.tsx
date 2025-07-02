@@ -11,8 +11,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-type LeadStatus = 'new' | 'contacted' | 'viewing' | 'converted' | 'lost';
-
 interface Lead {
   id: string;
   created_at: string;
@@ -21,30 +19,8 @@ interface Lead {
   phone: string;
   property_address: string;
   current_status: string;
-  status_email: string;
-  status_sms: string;
-  status?: LeadStatus;
 }
 
-// Status badge component
-const StatusBadge = ({ status = 'new' }: { status?: string }) => {
-  const statusColors: Record<string, string> = {
-    new: 'bg-blue-100 text-blue-800',
-    contacted: 'bg-yellow-100 text-yellow-800',
-    viewing: 'bg-purple-100 text-purple-800',
-    converted: 'bg-green-100 text-green-800',
-    lost: 'bg-red-100 text-red-800',
-  };
-  
-  const displayStatus = status?.toLowerCase() || 'new';
-  const statusText = displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1);
-
-  return (
-    <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors[displayStatus]}`}>
-      {statusText}
-    </span>
-  );
-};
 
 export default function AdminDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -99,15 +75,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold">Leads Dashboard</h1>
-        <button 
-          onClick={fetchLeads}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Refreshing...' : 'Refresh'}
-        </button>
       </div>
       
       {error && (
@@ -125,8 +94,7 @@ export default function AdminDashboard() {
                 <TableHead className="font-semibold">Email</TableHead>
                 <TableHead className="font-semibold">Phone</TableHead>
                 <TableHead className="font-semibold">Property</TableHead>
-                <TableHead className="font-semibold">Status</TableHead>
-                <TableHead className="font-semibold">Submitted</TableHead>
+                <TableHead className="font-semibold">Current Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -154,11 +122,8 @@ export default function AdminDashboard() {
                       <TableCell className="text-gray-600">{lead.email?.trim()}</TableCell>
                       <TableCell className="text-gray-600">{lead.phone?.trim()}</TableCell>
                       <TableCell className="text-gray-600">{lead.property_address?.trim()}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={status} />
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {new Date(lead.created_at).toLocaleString()}
+                      <TableCell className="capitalize">
+                        {status}
                       </TableCell>
                     </TableRow>
                   );
